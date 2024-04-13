@@ -12,7 +12,8 @@ defmodule VdPec2.Plots.Grid do
     |> CSV.decode!(headers: true)
     |> Enum.filter(fn %{"Dia" => dia} ->
       [_day, _month, year] = String.split(dia, "/")
-      year == "2024"
+
+      year > "2020"
     end)
   end
 
@@ -29,7 +30,8 @@ defmodule VdPec2.Plots.Grid do
           :date => Date.from_iso8601!("#{year}-#{month}-#{day}"),
           :absolute_level => elem["Nivell absolut (msnm)"],
           :volume_pct => elem["Percentatge volum embassat (%)"],
-          :current_volume => elem["Volum embassat (hm3)"]
+          :current_volume => elem["Volum embassat (hm3)"],
+          :year => year
         }
       end
     )
@@ -45,6 +47,7 @@ defmodule VdPec2.Plots.Grid do
         |> Vl.mark(:line)
         |> Vl.encode_field(:x, "date", time_unit: :dayofyear, type: :ordinal)
         |> Vl.encode_field(:y, "volume_pct", type: :quantitative)
+        |> Vl.encode_field(:color, "year", type: :nominal)
       end)
     )
   end
