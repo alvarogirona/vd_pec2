@@ -52,7 +52,12 @@ defmodule VdPec2.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.2"}
+      {:bandit, "~> 1.2"},
+      {:kino, "~> 0.12.3"},
+      {:kino_vega_lite, "~> 0.1.11"},
+      {:vega_lite, "~> 0.1.9"},
+      {:kino_table_input, "~> 0.1.0"},
+      {:csv, "~> 3.2"}
     ]
   end
 
