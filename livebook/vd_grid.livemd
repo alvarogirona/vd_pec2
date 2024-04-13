@@ -1,0 +1,89 @@
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"grid"}} -->
+
+# VD_matrix
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.12.3"},
+  {:kino_vega_lite, "~> 0.1.11"},
+  {:vega_lite, "~> 0.1.9"},
+  {:kino_table_input, "~> 0.1.0"},
+  {:csv, "~> 3.2"}
+])
+```
+
+## Section
+
+```elixir
+alias VegaLite, as: Vl
+```
+
+```elixir
+file = Kino.Input.file("Upload your file", accept: ~w(.csv))
+```
+
+```elixir
+file_ref = Kino.Input.read(file)
+path = Kino.Input.file_path(file_ref.file_ref)
+content = File.read!(path)
+```
+
+```elixir
+data_stream =
+  path
+  |> File.stream!()
+  |> CSV.decode!(headers: true)
+```
+
+```elixir
+selected_data =
+  data_stream
+  |> Enum.filter(fn %{"Dia" => dia} ->
+    [_day, _month, year] = String.split(dia, "/")
+    year == "2024"
+  end)
+  |> Enum.take(1000)
+```
+
+```elixir
+data_by_station =
+  selected_data
+  |> Enum.group_by(
+    fn elem ->
+      elem["Estació"]
+    end,
+    fn elem ->
+      [day, month, year] = String.split(elem["Dia"], "/")
+      IO.puts("#{year}-#{month}-#{day}")
+
+      %{
+        :date => Date.from_iso8601!("#{year}-#{month}-#{day}"),
+        :absolute_level => elem["Nivell absolut (msnm)"],
+        :volume_pct => elem["Percentatge volum embassat (%)"],
+        :current_volume => elem["Volum embassat (hm3)"]
+      }
+    end
+  )
+```
+
+```elixir
+data_to_plot =
+  data_by_station
+  |> Enum.flat_map(fn {_station_name, data} ->
+    data
+  end)
+```
+
+```elixir
+Vl.new(columns: 2)
+|> Vl.concat(
+  data_by_station
+  |> Enum.map(fn {station_name, data} ->
+    Vl.new(width: 350, height: 400, title: station_name)
+    |> Vl.data_from_values(data)
+    |> Vl.mark(:line)
+    |> Vl.encode_field(:x, "date", time_unit: :dayofyear, type: :ordinal)
+    |> Vl.encode_field(:y, "volume_pct", type: :quantitative)
+  end)
+)
+```
