@@ -18,7 +18,7 @@ defmodule VdPec2Web.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    live "/grid", Live.Grid
+    live "/grid", Live.Grid, :index
   end
 
   # Other scopes may use custom stacks.

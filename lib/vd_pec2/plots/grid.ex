@@ -36,11 +36,11 @@ defmodule VdPec2.Plots.Grid do
   end
 
   defp render_data(data_by_station) do
-    Vl.new(columns: 2)
+    Vl.new(columns: 4)
     |> Vl.concat(
       data_by_station
       |> Enum.map(fn {station_name, data} ->
-        Vl.new(width: 350, height: 400, title: station_name)
+        Vl.new(width: 200, height: 200, title: station_name)
         |> Vl.data_from_values(data)
         |> Vl.mark(:line)
         |> Vl.encode_field(:x, "date", time_unit: :dayofyear, type: :ordinal)
