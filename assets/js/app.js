@@ -22,9 +22,10 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import GridPlot from "./grid-plot"
+import PiePlot from "./pie-plot"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let hooks = { GridPlot };
+let hooks = { GridPlot, PiePlot };
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },

@@ -19,6 +19,7 @@ defmodule VdPec2Web.Router do
 
     get "/", PageController, :home
     live "/grid", Live.Grid, :index
+    live "/pie", Live.Pie, :index
   end
 
   # Other scopes may use custom stacks.
