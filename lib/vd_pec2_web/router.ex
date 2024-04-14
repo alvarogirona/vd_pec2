@@ -17,7 +17,7 @@ defmodule VdPec2Web.Router do
   scope "/", VdPec2Web do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", Live.Pie, :home
     live "/grid", Live.Grid, :index
     live "/pie", Live.Pie, :index
   end
