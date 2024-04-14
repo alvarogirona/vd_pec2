@@ -1,0 +1,404 @@
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"grid"},"persist_outputs":true} -->
+
+# VD Pec2 pie
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.12.3"},
+  {:kino_vega_lite, "~> 0.1.11"},
+  {:vega_lite, "~> 0.1.9"},
+  {:kino_table_input, "~> 0.1.0"},
+  {:csv, "~> 3.2"}
+])
+```
+
+## Section
+
+```elixir
+alias VegaLite, as: Vl
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+VegaLite
+```
+
+```elixir
+file = Kino.Input.file("Upload your file", accept: ~w(.csv))
+```
+
+```elixir
+file_ref = Kino.Input.read(file)
+path = Kino.Input.file_path(file_ref.file_ref)
+content = File.read!(path)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+"NUM_CAS,ADREÇA,NUMERO,ESCALA,PIS,PORTA,CODI_POSTAL,POBLACIO,COMARCA,NOM_PROVINCIA,CODI_POBLACIO,CODI_COMARCA,CODI_PROVINCIA,REFERENCIA CADASTRAL,ZONA CLIMATICA,METRES_CADASTRE,ANY_CONSTRUCCIO,US_EDIFICI,Qualificació de consum d'energia primaria no renovable,Energia primària no renovable,Qualificacio d'emissions de CO2,Emissions de CO2,Consum d'energia final,Cost anual aproximat d'energia per habitatge,VEHICLE ELECTRIC,SOLAR TERMICA,SOLAR FOTOVOLTAICA,SISTEMA BIOMASSA,XARXA DISTRICTE,ENERGIA GEOTERMICA,INFORME_INS_TECNICA_EDIFICI,Eina de certificacio,VALOR AILLAMENTS,VALOR FINESTRES,Motiu de la certificacio,VALOR AILLAMENTS CTE,VALOR FINESTRES CTE,UTM_X,UTM_Y,Normativa construcció,Tipus Tramit,TIPUS_TERCIARI,Qualificació emissions calefacció,Emissions calefacció,Qualificació emissions refrigeració,Emissions refrigeració,Qualificació emissions ACS,Emissions ACS,Qualificació emissions enllumenament,Emissions enllumenament,Qualificació energia calefacció,Energia calefacció,Qualificació energia refrigeració,Energia refrigeració,Qualificació energia ACS,Energia ACS,Qualificació energia enllumenament,Energia enllumenament,Qualificació energia calefacció demanda,Energia calefacció demanda,Qualificació energia refrigeració demanda,Energia refrigeració demanda,VENTILACIO US RESIDENCIAL,LONGITUD,LATITUD,GEOREFERÈNCIA,REHABILITACIO_ENERGETICA,ACTUACIONS_REHABILITACIO,DATA_ENTRADA,LIMADM_MUNICIPI,LIMADM COMARCA\nCK89NMFZ3,Carrer Esplugues de LLobregat 65 i Jardi Mon Recó,5,,,,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,,C2,455,,Bloc d'habitatges plurifamiliar,B,34.7,A,5.88,17.76,0.56,NO,NO,NO,NO,NO,NO,,HULC,0.41,2.72,Nova construcció,0.49,2.1,,,CTE 2013,Edificis acabats,,A,2.84,C,1.36,A,1.67,,,B,16.78,D,8.05,B,9.87,,,C,20.14,C,6.51,,,,,,,07/10/2021,,\nMX46KM7S,Lugar AEROPUERTO JOSEP TARRADELLAS BARCELONA-EL PRAT,S/N,,,,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,3125143DF2732E0000KH,C2,1610,,Terciario,C,176.98,C,29.98,90.57,14.36,NO,NO,NO,NO,NO,NO,,CE3X,0.73,3.13,\"Edificios o partes de edificios (+500 m2) de uso administrativo, sanitario, comercial, docente, restauración...\",0.49,2.1,,,CTE 2006,Edificis existents,Oficinas,C,22.32,A,0.22,F,1.29,B,6.15,D,131.76,A,1.28,F,7.63,B,36.31,D,77.95,A,0.95,,,,,NO,,11/06/2022,,\n2QXQ1MLM7,Carrer Enric Borràs,35,,,,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,4661407DF2745B,C2,894.6,,Bloc d'habitatges plurifamiliar,E,148.97,E,33.17,0,0,,NO,NO,NO,,NO,,CE3X,0,0,Sol·licitud d'ajuts,0.49,2.1,,,Abans de 1979,Edificis existents,,E,27.58,C,1.15,F,5.31,,0,E,130.22,D,6.82,G,25.08,,0,F,100.67,D,6.98,,,,,,,18/11/2015,,\nNY3JFX1WF,Carrer Ferran Puig,32,,1,1,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,4259132DF2745G0001IZ,C2,76,,Habitatge unifamiliar,E,132.72,E,27.7,108.41,7.03,NO,NO,NO,NO,NO,NO,,CE3X,2.38,3.44,Compravenda,0.49,2.1,,,Abans de 1979,Edificis existents,,E,22.15,C,1.61,D,3.95,,0,E,104.57,D,9.49,E,18.65,,0,E,54.31,D,9.72,,,,,NO,,02/09/2020,,\nKKSKDKC4V,Calle PINTOR ISIDRO NONELL,113,,,,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,4661415DF2746B0001XH,C2,190,,Vivienda unifamiliar,B,43.67,A,7.66,24.34,3.36,NO,NO,NO,NO,NO,NO,,CE3X,0.29,3.44,Certificación voluntaria,0.49,2.1,,,CTE 2019,Edificis existents,,A,5.91,A,0.46,A,1.29,,0,B,34.87,A,2.72,A,6.08,,0,B,31.46,A,2.39,,,,,NO,,03/11/2021,,\n6VXLF3BDR,Carrer Riu Llobregat,92,,,,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,3844102DF2734D0016OI,C2,3666,,Terciari,C,158.28,C,31.19,114.93,9.71,NO,NO,NO,NO,NO,NO,,CE3X,0.98,4.48,Certificació voluntària,0.49,2.1,,,NBE-CT-79,Edificis existents,Local,G,21.05,B,1.72,F,0.99,A,7.43,G,99.59,B,10.13,E,4.68,A,43.88,G,69.8,B,9.28,,,,,NO,,22/06/2020,,\nF9CQKR6LV,Passatge de l'estació,S/N,,,,08820,Prat de Llobregat (El),Baix Llobregat,Barcelona,08169,11,08,--------------,C2,154.53,,Terciari,C,268.88,B,45.55,137.6,3371.77,NO,NO,NO,NO,NO,NO,,CE3X,0.73,0,Certificació voluntària,0.49,2.1,,,CTE 2006,Edificis existents,Oficines,C,21.36,A,0.23,G,10.26,A,13.69,D,126.11,A,1.37,G,60.58,A,80.82,G,218.46,A,1.94,,," <> ...
+```
+
+```elixir
+data_stream =
+  path
+  |> File.stream!()
+  |> CSV.decode!(headers: true)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+#Stream<[
+  enum: #Function<61.53678557/2 in Stream.transform/4>,
+  funs: [#Function<48.53678557/1 in Stream.map/2>]
+]>
+```
+
+```elixir
+selected_data =
+  data_stream
+  |> Enum.map(fn entry ->
+    %{
+      qualificacio_energia_acs: entry["Qualificació energia ACS"],
+      qualificacio_energia_calefaccio: entry["Qualificació energia calefacció demanda"],
+      qualificacio_co2: entry["Qualificacio d'emissions de CO2"],
+      qualificacio_energia_refrigeracio: entry["Qualificació energia refrigeració"]
+    }
+  end)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "B",
+    qualificacio_energia_calefaccio: "C",
+    qualificacio_energia_refrigeracio: "D"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "D",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "F",
+    qualificacio_energia_refrigeracio: "D"
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "E",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "D"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "A",
+    qualificacio_energia_calefaccio: "B",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "E",
+    qualificacio_energia_calefaccio: "G",
+    qualificacio_energia_refrigeracio: "B"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "G",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "F",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "D",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "C",
+    qualificacio_energia_calefaccio: "A",
+    qualificacio_energia_refrigeracio: "B"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "A",
+    qualificacio_energia_calefaccio: "B",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "E"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "B",
+    qualificacio_energia_calefaccio: "D",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "A",
+    qualificacio_energia_calefaccio: "B",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "G",
+    qualificacio_energia_refrigeracio: "D"
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "",
+    qualificacio_energia_calefaccio: "",
+    qualificacio_energia_refrigeracio: ""
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "G",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "D",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "B",
+    qualificacio_energia_calefaccio: "C",
+    qualificacio_energia_refrigeracio: "B"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "G",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "B"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "A",
+    qualificacio_energia_calefaccio: "C",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "B",
+    qualificacio_energia_calefaccio: "B",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "G",
+    qualificacio_energia_refrigeracio: "F"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "",
+    qualificacio_energia_calefaccio: "",
+    qualificacio_energia_refrigeracio: ""
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "C",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "A",
+    qualificacio_energia_calefaccio: "A",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "D",
+    qualificacio_energia_refrigeracio: "E"
+  },
+  %{
+    qualificacio_co2: "B",
+    qualificacio_energia_acs: "A",
+    qualificacio_energia_calefaccio: "B",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "D"
+  },
+  %{
+    qualificacio_co2: "A",
+    qualificacio_energia_acs: "B",
+    qualificacio_energia_calefaccio: "C",
+    qualificacio_energia_refrigeracio: "B"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "D",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "E",
+    qualificacio_energia_calefaccio: "F",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "F",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "E",
+    qualificacio_energia_calefaccio: "F",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "D",
+    qualificacio_energia_acs: "F",
+    qualificacio_energia_calefaccio: "F",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{
+    qualificacio_co2: "E",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "E",
+    qualificacio_energia_refrigeracio: "C"
+  },
+  %{
+    qualificacio_co2: "C",
+    qualificacio_energia_acs: "G",
+    qualificacio_energia_calefaccio: "D",
+    qualificacio_energia_refrigeracio: "A"
+  },
+  %{qualificacio_co2: "B", qualificacio_energia_acs: "C", qualificacio_energia_calefaccio: "B", ...},
+  %{qualificacio_co2: "D", qualificacio_energia_acs: "E", ...},
+  %{qualificacio_co2: "D", ...},
+  %{...},
+  ...
+]
+```
+
+```elixir
+pie_data =
+  selected_data
+  |> Enum.group_by(fn %{:qualificacio_energia_acs => key} -> key end)
+  |> Enum.map(fn {key, entries} ->
+    %{
+      category: key,
+      count: Enum.count(entries)
+    }
+  end)
+  |> Enum.filter(fn %{category: category} -> category != "" end)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  %{count: 340, category: "A"},
+  %{count: 66, category: "B"},
+  %{count: 121, category: "C"},
+  %{count: 248, category: "D"},
+  %{count: 256, category: "E"},
+  %{count: 493, category: "F"},
+  %{count: 5686, category: "G"}
+]
+```
+
+```elixir
+Vl.new()
+|> Vl.data_from_values(pie_data)
+|> Vl.mark(:arc)
+|> Vl.encode_field(:theta, "count", type: :quantitative)
+|> Vl.encode_field(
+  :fill,
+  "category",
+  type: :nominal,
+  scale: [scheme: "turbo"]
+)
+```
+
+<!-- livebook:{"output":true} -->
+
+```vega-lite
+{"$schema":"https://vega.github.io/schema/vega-lite/v5.json","data":{"values":[{"category":"A","count":340},{"category":"B","count":66},{"category":"C","count":121},{"category":"D","count":248},{"category":"E","count":256},{"category":"F","count":493},{"category":"G","count":5686}]},"encoding":{"fill":{"field":"category","scale":{"scheme":"turbo"},"type":"nominal"},"theta":{"field":"count","type":"quantitative"}},"mark":"arc"}
+```
