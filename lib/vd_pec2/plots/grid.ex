@@ -38,14 +38,14 @@ defmodule VdPec2.Plots.Grid do
   end
 
   defp render_data(data_by_station) do
-    Vl.new(columns: 4)
+    Vl.new(columns: 3)
     |> Vl.concat(
       data_by_station
       |> Enum.map(fn {station_name, data} ->
         Vl.new(width: 200, height: 200, title: station_name)
         |> Vl.data_from_values(data)
         |> Vl.mark(:line)
-        |> Vl.encode_field(:x, "date", time_unit: :dayofyear, type: :ordinal)
+        |> Vl.encode_field(:x, "date", time_unit: :monthdate, type: :ordinal)
         |> Vl.encode_field(:y, "volume_pct", type: :quantitative)
         |> Vl.encode_field(:color, "year", type: :nominal)
       end)
