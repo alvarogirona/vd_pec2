@@ -20,6 +20,7 @@ defmodule VdPec2Web.Router do
     live "/", Live.Pie, :home
     live "/grid", Live.Grid, :index
     live "/pie", Live.Pie, :index
+    live "/tile", Live.TileGridPlot, :index
   end
 
   # Other scopes may use custom stacks.
