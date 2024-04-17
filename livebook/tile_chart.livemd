@@ -1,0 +1,71 @@
+# Untitled notebook
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.12.3"},
+  {:kino_vega_lite, "~> 0.1.11"},
+  {:csv, "~> 3.2"},
+  {:vega_lite, "~> 0.1.9"}
+])
+```
+
+## Section
+
+```elixir
+alias VegaLite, as: Vl
+```
+
+```elixir
+file = Kino.Input.file("Upload your file", accept: ~w(.csv))
+```
+
+```elixir
+file_ref = Kino.Input.read(file)
+path = Kino.Input.file_path(file_ref.file_ref)
+content = File.read!(path)
+```
+
+```elixir
+data_stream =
+  path
+  |> File.stream!()
+  |> CSV.decode!(headers: true)
+```
+
+```elixir
+selected_data =
+  data_stream
+  |> Enum.map(fn entry ->
+    %{
+      "name" => entry["name"],
+      "xpos" => entry["xpos"],
+      "ypos" => entry["ypos"],
+      "wxpos" => entry["wxpos"],
+      "wypos" => entry["wypos"],
+      "symbol" => entry["symbol"],
+      "color" => "##{entry["cpk-hex"]}"
+    }
+  end)
+```
+
+```elixir
+Vl.new(width: 1800, height: 1600)
+|> Vl.data_from_values(selected_data)
+|> Vl.encode_field(:x, "xpos", type: :quantitative)
+|> Vl.encode_field(:y, "ypos", type: :quantitative, sort: :descending)
+|> Vl.encode_field(:text, "symbol", type: :nominal)
+|> Vl.layers([
+  Vl.new()
+  |> Vl.mark(:square, size: 9000)
+  |> Vl.encode_field(:color, "color", legend: nil),
+  Vl.new()
+  |> Vl.mark(:text, fill: "#FFFFFF")
+  |> Vl.encode_field(:text, "symbol", type: :nominal)
+  |> Vl.encode(:size, value: 15),
+  Vl.new()
+  |> Vl.mark(:text, dy: 20, fill: :white)
+  |> Vl.encode_field(:text, "name", type: :nominal, padding: 20)
+  |> Vl.encode(:size, value: 15)
+])
+|> Vl.config(axis: [grid: false, labels: false, domain: false, labels: false, ticks: false])
+```
